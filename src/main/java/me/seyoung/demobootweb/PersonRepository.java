@@ -1,2 +1,6 @@
-package me.seyoung.demobootweb;public interface PersonRepository {
+package me.seyoung.demobootweb;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PersonRepository extends JpaRepository<Person, Long> {
 }
