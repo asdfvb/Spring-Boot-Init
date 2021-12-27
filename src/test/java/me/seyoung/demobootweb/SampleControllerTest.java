@@ -1,5 +1,6 @@
 package me.seyoung.demobootweb;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.platform.engine.TestExecutionResult;
@@ -9,9 +10,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.oxm.Marshaller;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import sun.net.www.MimeTable;
+
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
+
+import java.io.StringWriter;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +39,12 @@ public class SampleControllerTest {
 
     @Autowired
     private PersonRepository personRepository;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    Marshaller marshaller;
 
     //get 방식의 url을 호출하여 결과 받아보기
     /*@Test
@@ -76,6 +90,56 @@ public class SampleControllerTest {
 
     @Test
     public void stringMessage() throws Exception{
+        this.mockMvc.perform(get("/message")
+                .content("hello"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("hello"));
+
+
     }
 
+    @Test
+    public void jsonMessage() throws Exception{
+        Person person = new Person();
+        person.setId(2019l);
+        person.setName("seyoung");
+
+        String jsonstring = objectMapper.writeValueAsString(person);
+
+        this.mockMvc.perform(get("/jsonMessage")
+                        //본문에 보내는 데이터가 JSON 타입이다를 알려줌
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        //JSON으로 응답이 오길 원한다.
+                        .accept(MediaType.APPLICATION_JSON_UTF8)
+                        .content(jsonstring))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(2019))
+                .andExpect(jsonPath("$.name").value("seyoung"));
+
+    }
+
+    @Test
+    public void xmlMessage() throws Exception{
+        Person person = new Person();
+        person.setId(2019l);
+        person.setName("seyoung");
+
+        StringWriter stringWriter = new StringWriter();
+        Result result = new StreamResult(stringWriter);
+        marshaller.marshal(person, result);
+        String xmlString = stringWriter.toString();
+
+        this.mockMvc.perform(get("/jsonMessage")
+                        //본문에 보내는 데이터가 XML 타입이다를 알려줌
+                        .contentType(MediaType.APPLICATION_XML)
+                        //XML으로 응답이 오길 원한다.
+                        .accept(MediaType.APPLICATION_XML)
+                        .content(xmlString))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(xpath("person/name").string("seyoung"))
+                .andExpect(xpath("person/id").string("2019"));
+    }
 }

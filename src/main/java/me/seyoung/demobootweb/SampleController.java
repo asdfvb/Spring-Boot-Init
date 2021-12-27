@@ -72,10 +72,22 @@ public class SampleController {
 
 
     //***************************** messageConverter
+
+    /*
+    *
+    * @RequestBody : 요청 본문에 들어 있는 메세지를 http message converter를 사용하여 컨버전 함(Person로)
+    *
+    * @ResponseBody - @RestController를 사용할경우에는 default로 ResponseBody 사용
+    *
+    * */
     @GetMapping("/message")
-    //@ResponseBody - @RestController를 사용할경우에는 default로 ResponseBody 사용
     public String message(@RequestBody Person person){
         return " hello person";
     }
 
+
+    @GetMapping("/jsonMessage")
+    public Person jsonMessage(@RequestBody Person person){
+        return person;
+    }
 }

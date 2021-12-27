@@ -3,7 +3,9 @@ package me.seyoung.demobootweb;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 @Entity
 public class Person {
     @Id @GeneratedValue //자동 생성
